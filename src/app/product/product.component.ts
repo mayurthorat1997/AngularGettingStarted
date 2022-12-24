@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ProductService } from './product.service';
 import { IProduct } from './ProductInterface';
 
 @Component({
@@ -6,14 +8,20 @@ import { IProduct } from './ProductInterface';
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.css']
 })
-export class ProductComponent implements OnInit{
+export class ProductComponent implements OnInit, OnDestroy{
  
+  
   pageTitle="Product List !!";
   imageWidth=50;
   imageMargin=2;
   showImage: boolean=false;
-private _filterList: string="";
-filterProduct:IProduct[]=[];
+  errorMessage:string='';
+  sub!: Subscription;
+  
+  private _filterList: string="";
+  filterProduct:IProduct[]=[];
+
+constructor(private productService:ProductService){}
 
 get filterList():string {
   return this._filterList;
@@ -24,57 +32,22 @@ set filterList(value:string){
   this.filterProduct=this.performFilter(value);
 }
 
-products: IProduct[]=[
-  {
-    "productId": 2,
-    "productName": "Garden Cart",
-    "productCode": "GDN-0023",
-    "releaseDate": "March 18, 2021",
-    "description": "15 gallon capacity rolling garden cart",
-    "price": 32.99,
-    "starRating": 4.2,
-    "imageUrl": "assets/images/garden_cart.png"
-  },
-  {
-    "productId": 5,
-    "productName": "Hammer",
-    "productCode": "TBX-0048",
-    "releaseDate": "May 21, 2021",
-    "description": "Curved claw steel hammer",
-    "price": 8.9,
-    "starRating": 4.8,
-    "imageUrl": "assets/images/hammer.png"
-  },{
-    "productId": 5,
-    "productName": "Fammer",
-    "productCode": "TBX-0048",
-    "releaseDate": "May 21, 2021",
-    "description": "Curved claw steel hammer",
-    "price": 8.9,
-    "starRating": 4.8,
-    "imageUrl": "assets/images/hammer.png"
-  },{
-    "productId": 5,
-    "productName": "Haddmmer",
-    "productCode": "TBX-0048",
-    "releaseDate": "May 21, 2021",
-    "description": "Curved claw steel hammer",
-    "price": 8.9,
-    "starRating": 4.8,
-    "imageUrl": "assets/images/hammer.png"
-  },{
-    "productId": 5,
-    "productName": "Maammer",
-    "productCode": "TBX-0048",
-    "releaseDate": "May 21, 2021",
-    "description": "Curved claw steel hammer",
-    "price": 8.9,
-    "starRating": 4.8,
-    "imageUrl": "assets/images/hammer.png"
-  }
-];
+products: IProduct[]=[];
+
 ngOnInit(): void {
-  this.filterList="cart";
+  this.sub=this.productService.getProducts().subscribe({
+    next: products=>
+    {
+      this.products=products;
+      this.filterProduct=this.products;
+    },
+    error:err=>this.errorMessage=err
+  });
+  
+ }
+
+ ngOnDestroy(): void {
+   this.sub.unsubscribe();
  }
 
 toggleImage():void
@@ -86,5 +59,8 @@ performFilter(filterby:string):IProduct[]{
 filterby=filterby.toLocaleLowerCase();
 return this.products.filter((product:IProduct)=>
 product.productName.toLocaleLowerCase().includes(filterby));
+}
+onRatingClicked(message: string): void{
+this.pageTitle='Product List: '+message;
 }
 }

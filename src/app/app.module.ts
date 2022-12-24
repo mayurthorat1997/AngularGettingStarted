@@ -1,20 +1,26 @@
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import {HttpClientModule} from '@angular/common/http';
 
 import { AppComponent } from './app.component';
-import { ProductComponent } from './product/product.component';
-import { MayurComponent } from './mayur/mayur.component';
+import { WelcomeComponent } from './home/welcome.component';
+import { RouterModule } from '@angular/router';
+import { ProductModule } from './product/product.module';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ProductComponent,
-    MayurComponent
+    WelcomeComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule
+    HttpClientModule,
+    RouterModule.forRoot([
+      {path:'welcome',component:WelcomeComponent},
+      {path:'',redirectTo:'welcome',pathMatch:'full'},
+      {path:'**',redirectTo:'welcome',pathMatch:'full'}
+    ]),
+    ProductModule
   ],
   bootstrap: [AppComponent]
 })
